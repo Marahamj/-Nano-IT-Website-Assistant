@@ -1,0 +1,327 @@
+{
+  "name": "Nano rag 1",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -720,
+        160
+      ],
+      "id": "e3286386-13aa-42bb-b970-0d7d617970f7",
+      "name": "When chat message received",
+      "webhookId": "11e919ba-fff0-423c-a748-104e4f586835"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are Nano IT’s bilingual RAG assistant.\n\nFor any factual question about Nano IT, use search_knowledge_base and answer only from the retrieved Supabase knowledge-base context. Never invent or infer prices, timelines, clients, guarantees, technologies, services, contact details, or any other information not supported by retrieved context.\n\nReply in the same language as the user’s latest message: Arabic (AR) or English (EN). Keep normal answers concise, professional, and usually 2–5 sentences.\n\nIf the requested answer is not supported by retrieved context, politely say in the user’s language that you do not have enough verified information. Offer a human handoff. Provide email, WhatsApp, phone, or other contact details only when they are explicitly present in the retrieved context.\n\nUse create_lead only after all of the following are true:\n1. The visitor requests a consultation or asks to be contacted.\n2. You collect the visitor’s name and at least one valid contact method: email or phone.\n3. You show the captured details to the visitor.\n4. The visitor explicitly confirms that the details are correct and agrees to submit the request.\n\nNever invent missing lead fields. Call create_lead only once for each confirmed lead. Set language to AR for Arabic and EN for English. Set source to nanoit-p2-chat.\n\nDo not call create_lead for normal questions about services, pricing, technologies, or timelines.\n\nIf create_lead succeeds, confirm briefly that the request was submitted to Nano IT.\n\nIf create_lead fails, do not claim that the lead was saved, retained, queued, or will be retried later. Do not retry automatically. State briefly that the request could not be submitted at this time, then offer verified contact details only if they are present in the retrieved context. Never reveal credentials, API keys, URLs, SQL errors, workflow names, or internal technical details.\nDo not use search_knowledge_base for greetings, thanks, simple confirmations, or follow-up questions about already collected lead details. Use it only for questions about Nano IT information.\n\nIf pricing, timelines, technologies, guarantees, client names, or contact details are not explicitly present in the retrieved context, clearly say that the information is not currently verified. Do not estimate or infer it.\n\nDo not display raw tool output, JSON, API responses, IDs, logs, or technical messages to the visitor. When create_lead returns a successful result, reply only with a short confirmation in the visitor's language.\n\nIf the visitor provides a company name, project details, or preferred contact time, include them in create_lead. If these are not provided, leave them empty; do not ask for them if name plus email or phone have already been collected and confirmed.\n\nDo not ask the visitor to repeat details that were already provided in the current session. Preserve the confirmed lead details in the session context until submission succeeds or the visitor cancels.\n\n",
+          "maxIterations": 3,
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -128,
+        192
+      ],
+      "id": "4dee2c7e-94d6-495f-889a-8144209a916c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        528
+      ],
+      "id": "69695dcf-a901-43ed-96db-8a1f42a4131b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jCH3Sr2rAGvt6ANX",
+          "name": "OpenAI account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        624
+      ],
+      "id": "849a290e-864c-4f1c-bbf9-3060c79bfc81",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Access the vector database containing document page contents, knowledge base details, and bilingual FAQs (Arabic and English). Use this tool to retrieve accurate context for answering user questions, policies, and frequently asked questions.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 6,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        400
+      ],
+      "id": "ee2fb061-9137-4078-a53e-82b0a0b6f824",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "K11Ys9vH6Z3BxjMp",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        640
+      ],
+      "id": "d32a5fe6-cc9c-495b-8b3d-fd19c9d89a00",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "jCH3Sr2rAGvt6ANX",
+          "name": "OpenAI account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Submit a confirmed Nano IT lead to the P1 Lead Intake Bot.\nUse this tool only when the visitor explicitly asks to be contacted or confirms a consultation request.\nBefore calling it, collect and confirm the visitor’s name and at least one valid contact method: email or phone.\nNever invent missing information and call this tool only once for the confirmed lead.\nSet language to AR for Arabic and EN for English, and set source to nanoit-p2-chat.\nIf submission fails, provide a polite human-handoff message without revealing internal errors or credentials.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "3ocZlBVEY7OKO5RH",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3ocZlBVEY7OKO5RH",
+          "cachedResultName": "p1 _ smart lead intake1 bot"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name', `Full name of the confirmed lead`, 'string') }}",
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', `Valid email address of the lead`, 'string') }}",
+            "phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('phone', `Phone number of the lead`, 'string') }}",
+            "company": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('company', ``, 'string') }}",
+            "service_interest": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('service_interest', `Nano IT service requested`, 'string') }}",
+            "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', `Short summary of the request`, 'string') }}",
+            "language": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('language', ` AR for Arabic or EN for English`, 'string') }}",
+            "source": "nonoit-chatbot",
+            "sessionId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sessionId', `Current chat session ID`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "service_interest",
+              "displayName": "service_interest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        16
+      ],
+      "id": "4e137c8e-17ed-4486-9dce-5cf2bcb28753",
+      "name": "Create_lead",
+      "notesInFlow": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create_lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "878a5e22-3cd9-48ec-944a-45f64d09b61a",
+  "meta": {
+    "instanceId": "1d639dddf04f646071e4246e3ee57e7675d50a0ccfcd3c76122922076fe2a0d5"
+  },
+  "nodeGroups": [],
+  "id": "GrXGv4nCqaKvV6Sm",
+  "tags": []
+}

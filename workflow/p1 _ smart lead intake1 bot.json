@@ -1,0 +1,510 @@
+{
+  "name": "p1 _ smart lead intake1 bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7239acd7-5990-4fc3-b969-68fccb9bd0fb",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "239dad28-0a8c-4e0c-87c2-dfb38b75d339",
+      "name": "Webhook",
+      "webhookId": "7239acd7-5990-4fc3-b969-68fccb9bd0fb"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT EXISTS (\n    SELECT 1\n    FROM \"Smart-Lead-Bot\"\n    WHERE email IS NOT NULL\n      AND LOWER(TRIM(email)) = LOWER(TRIM($1))\n      AND received_at >= NOW() - INTERVAL '30 days'\n) AS is_duplicate;",
+        "options": {
+          "queryReplacement": "={{ [$json.email] }}\n"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        592,
+        144
+      ],
+      "id": "1ce089f8-256c-4fca-8798-11daf273a785",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "Pu1KWmSKU35AJLuC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0e51e11b-7bb5-4214-bbc9-68992e2c1389",
+              "leftValue": "={{ $json.is_duplicate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        144
+      ],
+      "id": "440e1ee7-96d0-441a-922e-61709d1ccd25",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "8602358226",
+        "text": "={{ '🚨 New Lead Intake\\n\\n' +\n'👤 Name: ' + ($('Code in Python').item.json.name || '—') + '\\n' +\n'📧 Email: ' + ($('Code in Python').item.json.email || '—') + '\\n' +\n'📱 Phone: ' + ($('Code in Python').item.json.phone || '—') + '\\n' +\n'🏢 Company: ' + ($('Code in Python').item.json.company || 'Individual') + '\\n\\n' +\n'📌 Service: ' + ($('Code in Python').item.json.service_interest || 'General Inquiry') + '\\n' +\n'📝 Message: ' + ($('Code in Python').item.json.message || '—') + '\\n' +\n'🌐 Source: ' + ($('Code in Python').item.json.source || 'unknown') + '\\n' +\n'🗣 Language: ' + ($('Code in Python').item.json.language || 'EN') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        256
+      ],
+      "id": "fb4663cc-13d7-495e-962f-94716d8605d9",
+      "name": "Send a text message",
+      "webhookId": "6e484f9b-6c7e-4352-a23c-4ad629b125fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "WHYxx8hstU8dW0s6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17R9jml50g8MUbzpPAXQlzktD3NR1OGzawFQqL_y_aOs",
+          "mode": "list",
+          "cachedResultName": "Smart lead Bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17R9jml50g8MUbzpPAXQlzktD3NR1OGzawFQqL_y_aOs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17R9jml50g8MUbzpPAXQlzktD3NR1OGzawFQqL_y_aOs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('Code in Python').item.json.phone }}",
+            "company": "={{ $('Code in Python').item.json.company }}",
+            "service_interest": "={{ $('Code in Python').item.json.service_interest }}",
+            "message": "={{ $('Code in Python').item.json.message }}",
+            "received_at": "={{ $json.received_at }}",
+            "summary": "={{ $json.summary }}",
+            "service_category": "={{ $json.service_category }}",
+            "intent_score": "={{ $json.intent_score }}",
+            "language": "={{ $json.language }}",
+            "name": "={{ $('Code in Python').item.json.name }}",
+            "email": "={{ $('Code in Python').item.json.email }}",
+            "source": "={{ $('Code in Python').item.json.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service_interest",
+              "displayName": "service_interest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service_category",
+              "displayName": "service_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent_score",
+              "displayName": "intent_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        256
+      ],
+      "id": "f841c0e2-5a8e-4e22-a9c2-ea6f0e6d2d56",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZpYq7HrzL7M2DN6o",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "seen_emails = set()\nclean_items = []\n\nfor item in _items:\n    j = item.get('json', {}) or {}\n\n    # Unwrap body when the data arrives from the Webhook\n    b = j.get('body') if isinstance(j.get('body'), dict) else {}\n    b = b or {}\n\n    def pick(*keys, default=''):\n        for k in keys:\n            v = j.get(k)\n            if v not in (None, ''):\n                return v\n        for k in keys:\n            v = b.get(k)\n            if v not in (None, ''):\n                return v\n        return default\n\n    email = str(pick('email')).strip().lower()\n\n    # Skip duplicate emails inside the same batch\n    if email:\n        if email in seen_emails:\n            continue\n        seen_emails.add(email)\n\n    clean_items.append({'json': {\n        'name': str(pick('name')).strip(),\n        'email': email,\n        'phone': str(pick('phone')).strip(),\n        'company': str(pick('company')).strip(),\n        'service_interest': pick('service_interest', 'service_requested'),\n        'message': pick('message', 'snippet'),\n        'language': (str(pick('language', default='EN')).strip().upper() or 'EN'),\n        'source': pick('source', default='webhook'),\n        'sessionId': pick('sessionId', 'session_id'),\n        'received_at': pick('received_at', 'timestamp'),\n    }})\n\nreturn clean_items\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        144
+      ],
+      "id": "5e300975-f13f-4d0f-9e81-b3afd68a3159",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ecc6d1b6-22f7-4f77-af4f-5ce1679feb49",
+              "name": "service_category",
+              "value": "={{ $('Code in Python').item.json.service_interest || 'General Inquiry' }}",
+              "type": "string"
+            },
+            {
+              "id": "5ca2dd80-3e82-44a5-a4e0-109daafef84a",
+              "name": "intent_score",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "79ccacee-78f6-473b-8136-c7615bf8649d",
+              "name": "language",
+              "value": "={{ $('Code in Python').item.json.language || 'EN' }}",
+              "type": "string"
+            },
+            {
+              "id": "099bb323-0df1-4684-8cb7-2c5875c903f8",
+              "name": "summary",
+              "value": "={{ $('Code in Python').item.json.message || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "099bb323-0df1-4684-8cb7-2c5875c903f9",
+              "name": "received_at",
+              "value": "={{ $('Code in Python').item.json.received_at || $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1168,
+        240
+      ],
+      "id": "692152fe-4746-4887-bab6-0db08b20694d",
+      "name": "Lead Defaults"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"success\": true,\n  \"status\": \"created\",\n  \"message\": \"Lead submitted successfully\",\n  \"source\": \"nanoit-p2-chat\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1792,
+        272
+      ],
+      "id": "8d09755d-e267-452f-baff-d6c39e9d6a58",
+      "name": "P1 Response"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"success\": false,\n  \"message\": \"This lead already exists. No new lead was created.\",\n  \"source\": \"nanoit-p2-chat\"\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1152,
+        16
+      ],
+      "id": "0896d57e-afa4-44fb-896c-8e4a4fb2d447",
+      "name": "P1 Duplicate Response"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "name"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "phone"
+            },
+            {
+              "name": "company"
+            },
+            {
+              "name": "service_interest"
+            },
+            {
+              "name": "message"
+            },
+            {
+              "name": "language"
+            },
+            {
+              "name": "source"
+            },
+            {
+              "name": "sessionId"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        256
+      ],
+      "id": "fef06cd3-2f29-4252-acb3-6d4ce0671636",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "P1 Duplicate Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lead Defaults",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Defaults": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "P1 Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3188cd86-c041-41c6-86fb-9b1311e91a5d",
+  "meta": {
+    "instanceId": "1d639dddf04f646071e4246e3ee57e7675d50a0ccfcd3c76122922076fe2a0d5"
+  },
+  "nodeGroups": [],
+  "id": "3ocZlBVEY7OKO5RH",
+  "tags": []
+}
