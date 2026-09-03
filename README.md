@@ -2,7 +2,15 @@
 
 Bilingual (Arabic/English) RAG-based chat assistant for `nanoitcompany.com`, built as part of the AI Agent & Automation Internship at Nano IT Company.
 
+Built as part of the AI Agent & Automation Internship at Nano IT Company.
 ---
+## 🌐 Live Links
+* **Live Assistant (Standalone Page):** https://nanochatbot73d1d.netlify.app/
+* **Embeddable Widget Snippet:** Available in `https://melodic-daffodil-f4b689.netlify.app/wedjet.js`
+
+---
+
+
 ## 🏗️ Architecture & Workflow Overview
 
 ```text
