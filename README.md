@@ -66,9 +66,9 @@ A 25-question bilingual evaluation set covering pricing, services, timelines, te
 
 Full Results: View Evaluation Set
 
-Pass Rate: <FILL IN FINAL %> / 25 (Target: 
-≥90%
- )
+Pass Rate: 92.6%  (25/27)
+[evaluation-set-25-questions.md](./evaluation-set-25-questions.md)
+ 
 
 
 
