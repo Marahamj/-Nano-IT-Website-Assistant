@@ -104,3 +104,10 @@ Embed the snippet from widget/nano-it-chat-widget-embed.html into any target web
 Very short, terse Arabic contact queries occasionally under-retrieve compared to English equivalents; mitigated by increasing Top K on the Supabase Vector Store node.
 
 create_lead requires both P1 and P2 workflows to be active on n8n; if P1 is paused, lead submissions fail gracefully with a human-handoff message rather than a false confirmation
+
+## Workflow Architecture
+![n8n Workflow](workflow%20canva/image.png)
+
+
+![n8n Workflow Screenshot](workflow%20canva/Screenshot%202026-09-02%20124329....png)
+
